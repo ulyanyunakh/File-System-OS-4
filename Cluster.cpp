@@ -4,7 +4,7 @@ class Cluster {
 private:
 	int clusterIndex;
 	int clusterSize;
-	std::string clusterInfo;
+	std::string clusterInfo = "";
 	bool clusterBool;
 public:
 	Cluster(int index, int size) {
@@ -27,6 +27,14 @@ public:
 
 	void freeCluster() {
 		clusterBool = true;
+	}
+
+	void setClusterInfo(std::string info) {
+		clusterInfo = info;
+	}
+
+	std::string getClusterInfo() {
+		return clusterInfo;
 	}
 
 	void freeClusterInfo() {

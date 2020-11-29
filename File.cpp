@@ -12,6 +12,10 @@ public:
         fileName = name;
     }
 
+    void setClusterNumbers(std::vector<int> numbers) {
+        clusterNumbers = numbers;
+    }
+
     std::vector<int> getClusterNumbers() {
         return clusterNumbers;
     }

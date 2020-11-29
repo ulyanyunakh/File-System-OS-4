@@ -8,7 +8,26 @@ private:
     std::string directoryName;
     Directory* parent;
     std::vector<File*> files;
-    std::vector<Directory*> childs;
+    std::vector<Directory*> directories;
+
+    std::vector<int> calculateClusterNumbers(Directory* directory, std::vector<int> numbers) {
+        std::vector<Directory*> directories = directory->getDirectories();
+        for (int i = 0; i < directories.size(); i++) {
+            (*directories[i]).updateClusterNumbers();
+            std::vector<int> temp = (*directories[i]).getClusterNumbers();
+            for (int j = 0; j < temp.size(); j++) {
+                numbers.push_back(temp[j]);
+            }
+        }
+        std::vector<File*> files = directory->getFiles();
+        for (int i = 0; i < files.size(); i++) {
+            std::vector<int> temp = (*files[i]).getClusterNumbers();
+            for (int j = 0; j < temp.size(); j++) {
+                numbers.push_back(temp[j]);
+            }
+        }
+        return numbers;
+    }
 public:
     Directory(int clusterNumber, Directory* dir, std::string name) {
         clusterNumbers.push_back(clusterNumber);
@@ -20,6 +39,11 @@ public:
         return clusterNumbers;
     }
 
+    void updateClusterNumbers() {
+        clusterNumbers.erase(clusterNumbers.begin() + 1, clusterNumbers.end());
+        clusterNumbers = calculateClusterNumbers(this, clusterNumbers);
+    }
+
     std::string getDirectoryName() {
         return directoryName;
     }
@@ -29,7 +53,7 @@ public:
     }
 
     std::vector<Directory*> getDirectories() {
-        return childs;
+        return directories;
     }
 
     void setDirectoryName(std::string newDirectoryName) {
@@ -50,14 +74,14 @@ public:
     }
 
     void addDirectory(Directory* directory) {
-        childs.push_back(directory);
+        directories.push_back(directory);
     }
 
     void removeDirectory(std::string dirName) {
-        for (int i = 0; i < childs.size(); i++)
+        for (int i = 0; i < directories.size(); i++)
         {
-            if ((*childs[i]).getDirectoryName() == dirName) {
-                childs.erase(childs.begin() + i);
+            if ((*directories[i]).getDirectoryName() == dirName) {
+                directories.erase(directories.begin() + i);
             }
         }
     }
