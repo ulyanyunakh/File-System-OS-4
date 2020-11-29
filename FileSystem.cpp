@@ -85,9 +85,11 @@ private:
         while (clusterNubmers.size() < number) {
             int clusterNumber = findFreeCluster();
             if (clusterNumber == -1) return;
+            clusters[clusterNumber].takeCluster();
             clusterNubmers.push_back(clusterNumber);
         }
         while (clusterNubmers.size() > number) {
+            clusters[clusterNubmers.back()].freeCluster();
             clusterNubmers.pop_back();
         }
 
@@ -103,7 +105,7 @@ private:
 
     std::string read(File* file) {
         std::vector<int> clusterNubmers = file->getClusterNumbers();
-        std::string str;
+        std::string str = "";
         for (int i = 0; i < clusterNubmers.size(); i++) {
             str += clusters[clusterNubmers[i]].getClusterInfo();
         }
@@ -147,6 +149,7 @@ public:
     }
     
     void createFile(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         if (!findFileName(action[1])) {
             int clusterNumber = findFreeCluster();
             if (clusterNumber != -1) {
@@ -154,11 +157,22 @@ public:
                 File* file = new File(clusterNumber, action[1]);
                 current->addFile(file);
                 root->updateClusterNumbers();
+                SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+                std::cout << "file created\n";
             }
+            else {
+                SetConsoleTextAttribute(handle, FOREGROUND_RED);
+                std::cout << "no more memory\n";
+            }
+        }
+        else {
+            SetConsoleTextAttribute(handle, FOREGROUND_RED);
+            std::cout << "file with this name exist\n";
         }
     }
 
     void createDirectory(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         if (!findDirectoryName(action[1])) {
             int clusterNumber = findFreeCluster();
             if (clusterNumber != -1) {
@@ -166,14 +180,23 @@ public:
                 Directory* directory = new Directory(clusterNumber, current, action[1]);
                 current->addDirectory(directory);
                 root->updateClusterNumbers();
+                SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+                std::cout << "directory created\n";
             }
+            else {
+                SetConsoleTextAttribute(handle, FOREGROUND_RED);
+                std::cout << "no more memory\n";
+            }
+        }
+        else {
+            SetConsoleTextAttribute(handle, FOREGROUND_RED);
+            std::cout << "directory with this name exist\n";
         }
     }
 
-    void showDirectory(std::vector<std::string> action) {
+    void showDirectory() {
         HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(handle, FOREGROUND_GREEN);
-
         std::cout << "Files:\n";
         std::vector<File*> files = current->getFiles();
         for (int i = 0; i < files.size(); i++) {
@@ -184,16 +207,6 @@ public:
         for (int i = 0; i < directories.size(); i++) {
             std::cout << (*directories[i]).getDirectoryName() << std::endl;
         }
-        int h = 0;
-        for (int i = 0; i < clusters.size(); i++) {
-            if (clusters[i].isFree()) h++;
-        }
-        std::cout << "Clusters: " << h << std::endl;
-
-        std::vector<int> clusterNumbers = current->getClusterNumbers();
-        std::cout << "Clusters in current directory: " << clusterNumbers.size() << std::endl;
-
-        SetConsoleTextAttribute(handle, FOREGROUND_INTENSITY);
     }
 
     void changeDirectory(std::vector<std::string> action) {
@@ -213,28 +226,41 @@ public:
     }
 
     void deleteFile(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         std::vector<File*> files = current->getFiles();
         for (int i = 0; i < files.size(); i++) {
             if ((*files[i]).getFileName() == action[1]) {
                 current->removeFile(action[1]);
                 deleteFile(files[i]);
                 root->updateClusterNumbers();
+                SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+                std::cout << "file deleted\n";
+                return;
             }
         }
+        SetConsoleTextAttribute(handle, FOREGROUND_RED);
+        std::cout << "file not found\n";
     }
 
     void deleteDirectory(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         std::vector<Directory*> directories = current->getDirectories();
         for (int i = 0; i < directories.size(); i++) {
             if ((*directories[i]).getDirectoryName() == action[1]) {
                 current->removeDirectory(action[1]);
                 deleteDirectory(directories[i]);
                 root->updateClusterNumbers();
+                SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+                std::cout << "directory deleted\n";
+                return;
             }
         }
+        SetConsoleTextAttribute(handle, FOREGROUND_RED);
+        std::cout << "directory not found\n";
     }
 
     void cutFile(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         std::vector<File*> files = current->getFiles();
         for (int i = 0; i < files.size(); i++) {
             if ((*files[i]).getFileName() == action[1]) {
@@ -242,11 +268,17 @@ public:
                 bufferDirectory = NULL;
                 bufferFile = files[i];
                 isCopy = false;
+                SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+                std::cout << "file in buffer\n";
+                return;
             }
         }
+        SetConsoleTextAttribute(handle, FOREGROUND_RED);
+        std::cout << "file not found\n";
     }
 
     void copyFile(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         std::vector<File*> files = current->getFiles();
         for (int i = 0; i < files.size(); i++) {
             if ((*files[i]).getFileName() == action[1]) {
@@ -254,11 +286,17 @@ public:
                 bufferDirectory = NULL;
                 bufferFile = files[i];
                 isCopy = true;
+                SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+                std::cout << "file in buffer\n";
+                return;
             }
         }
+        SetConsoleTextAttribute(handle, FOREGROUND_RED);
+        std::cout << "file not found\n";
     }
 
     void pasteFile() {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         if (bufferFile != NULL) {
             if (!isCopy) {
                 tempDirectory->removeFile(bufferFile->getFileName());
@@ -283,10 +321,17 @@ public:
             bufferFile = NULL;
             tempDirectory = NULL;
             isCopy = false;
+            SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+            std::cout << "file inserted\n";
+        }
+        else {
+            SetConsoleTextAttribute(handle, FOREGROUND_RED);
+            std::cout << "no file in buffer\n";
         }
     }
 
     void cutDirectory(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         std::vector<Directory*> directories = current->getDirectories();
         for (int i = 0; i < directories.size(); i++) {
             if ((*directories[i]).getDirectoryName() == action[1]) {
@@ -294,11 +339,17 @@ public:
                 bufferDirectory = directories[i];
                 bufferFile = NULL;
                 isCopy = false;
+                SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+                std::cout << "directory in buffer\n";
+                return;
             }
         }
+        SetConsoleTextAttribute(handle, FOREGROUND_RED);
+        std::cout << "directory not found\n";
     }
 
     void copyDirectory(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         std::vector<Directory*> directories = current->getDirectories();
         for (int i = 0; i < directories.size(); i++) {
             if ((*directories[i]).getDirectoryName() == action[1]) {
@@ -306,11 +357,17 @@ public:
                 bufferDirectory = directories[i];
                 bufferFile = NULL;
                 isCopy = true;
+                SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+                std::cout << "directory in buffer\n";
+                return;
             }
         }
+        SetConsoleTextAttribute(handle, FOREGROUND_RED);
+        std::cout << "directory not found\n";
     }
 
     void pasteDirectory() {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         if (bufferDirectory != NULL) {
             if (!isCopy) {
                 tempDirectory->removeDirectory(bufferDirectory->getDirectoryName());
@@ -344,28 +401,57 @@ public:
             bufferDirectory = NULL;
             tempDirectory = NULL;
             isCopy = false;
+            SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+            std::cout << "directory inserted\n";
+        }
+        else {
+            SetConsoleTextAttribute(handle, FOREGROUND_RED);
+            std::cout << "no directory in buffer\n";
         }
     }
 
     void writeFile(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         std::vector<File*> files = current->getFiles();
         for (int i = 0; i < files.size(); i++) {
             if ((*files[i]).getFileName() == action[1]) {
                 write(files[i], action[2]);
                 root->updateClusterNumbers();
+                SetConsoleTextAttribute(handle, FOREGROUND_BLUE);
+                std::cout << "file changed\n";
+                return;
             }
         }
+        SetConsoleTextAttribute(handle, FOREGROUND_RED);
+        std::cout << "file not found\n";
     }
 
     void readFile(std::vector<std::string> action) {
+        HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
         std::vector<File*> files = current->getFiles();
         for (int i = 0; i < files.size(); i++) {
             if ((*files[i]).getFileName() == action[1]) {
-                HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
                 SetConsoleTextAttribute(handle, FOREGROUND_GREEN);
                 std::cout << read(files[i]) << std::endl;
-                SetConsoleTextAttribute(handle, FOREGROUND_INTENSITY);
+                return;
             }
         }
+        SetConsoleTextAttribute(handle, FOREGROUND_RED);
+        std::cout << "file not found\n";
+    }
+
+    std::string getPath() {
+        std::vector<std::string> directories;
+        Directory* temp = current;
+        do {
+            directories.push_back(temp->getDirectoryName());
+            temp = temp->getParent();
+        } while (temp != NULL);
+        std::string path = "";
+        while (!directories.empty()) {
+            path += directories.back() + "\\";
+            directories.pop_back();
+        }
+        return path;
     }
 };
