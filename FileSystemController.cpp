@@ -19,6 +19,7 @@ private:
 	std::string PASTE_DIR = "pasteD";
 	std::string WRITE = "write";
 	std::string READ = "read";
+	std::string DUMP = "dump";
 	std::string HELP = "help";
 
 	std::vector<std::string> handleActionStr(std::string actionStr) {
@@ -55,6 +56,7 @@ private:
 		std::cout << WRITE << std::endl;
 		std::cout << READ << std::endl;
 		std::cout << HELP << std::endl;
+		std::cout << DUMP << std::endl;
 		std::cout << "exit" << std::endl;
 	}
 public:
@@ -82,6 +84,7 @@ public:
 		else if (action[0] == PASTE_DIR) fileSystem->pasteDirectory();
 		else if (action[0] == WRITE) fileSystem->writeFile(action);
 		else if (action[0] == READ) fileSystem->readFile(action);
+		else if (action[0] == DUMP) fileSystem->dummyDump();
 		else if (action[0] == HELP) help();
 		else {
 			HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);

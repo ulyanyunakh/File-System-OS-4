@@ -454,4 +454,10 @@ public:
         }
         return path;
     }
+
+    void dummyDump() {
+        for (int i = 0; i < clusters.size(); i++) {
+            std::cout << clusters[i].getClusterIndex() << " cluste info: " << clusters[i].getClusterInfo() << std::endl;
+        }
+    }
 };

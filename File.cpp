@@ -5,7 +5,6 @@ class File {
 private:
     std::vector<int> clusterNumbers;
     std::string fileName;
-    std::string fileInfo;
 public:
     File(int clusterNumber, std::string name) {
         clusterNumbers.push_back(clusterNumber);
@@ -26,13 +25,5 @@ public:
     
     void setFileName(std::string newName) {
         fileName = newName;
-    }
-    
-    std::string getFileInfo() {
-        return fileInfo;
-    }
-    
-    void setFileInfo(std::string newInfo) {
-        fileInfo = newInfo;
     }
 };
