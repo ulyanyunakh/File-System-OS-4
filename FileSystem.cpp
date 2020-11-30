@@ -391,8 +391,8 @@ public:
                         while (findDirectoryName(directory->getDirectoryName())) {
                             directory->setDirectoryName(directory->getDirectoryName() + "Copy");
                         }
-                        current->addDirectory(directory);
                         copyDirectory(directory, bufferDirectory);
+                        current->addDirectory(directory);
                         root->updateClusterNumbers();
                     }
                 }
